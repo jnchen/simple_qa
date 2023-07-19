@@ -44,6 +44,8 @@ class QA:
             from llm_chatgpt import ChatBot
             self.llm = ChatBot(conf.get_open_api_key())
 
+        self.store = Store(self.embedding, self.vector_store_path, self.content_store_path)
+
         print(f'~ QA system is ready ~')
 
     def add_resource(self, type, url):
@@ -58,8 +60,7 @@ class QA:
     def ask(self, question):
         from prompt import Prompt
         # query similarity prompt
-        store = Store(self.embedding, self.vector_store_path, self.content_store_path)
-        relative_content = store.query(question, 3)
+        relative_content = self.store.query(question, 3)
 
         # tempalate fil
         promptor = Prompt(self.llm_model)
