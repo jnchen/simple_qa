@@ -1,0 +1,10 @@
+numpy
+torch
+transformers
+sentence_transformers
+gradio
+pymupdf
+openai
+faiss-cpu
+requests
+beautifulsoup4
