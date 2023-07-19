@@ -28,3 +28,10 @@ class Config:
 
     def get_glm_local_cache(self):
         return self.config['glm']['local_cache']
+
+    def get_web_port(self):
+        port_str = self.config['web']['port']
+        if port_str:
+            return int(port_str)
+        else:
+            return 6006

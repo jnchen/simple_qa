@@ -6,6 +6,7 @@ import random
 import time
 from application import QA
 import argparse
+from config import Config
 
 qa = None
 
@@ -31,5 +32,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     qa = QA(args.config)
+
+    conf = Config(args.config)
     
-    shell.launch()
+    shell.launch(server_port=conf.get_web_port())

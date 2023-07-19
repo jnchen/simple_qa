@@ -6,11 +6,10 @@ from config import Config
 from parser import Parser
 from splitter import Splitter
 from store import Store
-from prompt import Prompt
 
 
 class QA:
-    def __init__(self, config='qa.conf'):
+    def __init__(self, config='qa.conf', build_mode=False):
         conf = Config(config)
 
         self.max_embedding_length = conf.get_max_length()
@@ -21,6 +20,16 @@ class QA:
         elif conf.get_embedding_type() == 'transformers':
             from embedding_transformers import Embedding
             self.embedding = Embedding()
+
+        self.vector_store_path = conf.get_vector_store() if conf.get_vector_store() else './db'
+        print(f'Prepare Load the vector from {self.vector_store_path}.')
+        
+        self.content_store_path = conf.get_content_store() if conf.get_content_store() else './db'
+        print(f'Prepare Load the content from {self.content_store_path}.')
+
+        if build_mode:
+            return
+
             
         self.llm_model = conf.get_llm_model() if conf.get_llm_model() else 'chatglm2-6b'
 
@@ -31,16 +40,9 @@ class QA:
                 self.llm = ChatBot(cache)
             else:
                 self.llm = ChatBot()
-        else
+        else:
             from llm_chatgpt import ChatBot
             self.llm = ChatBot(conf.get_open_api_key())
-
-        
-        self.vector_store_path = conf.get_vector_store() if conf.get_vector_store() else './db'
-        print(f'Loading the vector from {self.vector_store_path}.')
-        
-        self.content_store_path = conf.get_content_store() if conf.get_content_store() else './db'
-        print(f'Loading the content from {self.content_store_path}.')
 
         print(f'~ QA system is ready ~')
 
@@ -54,16 +56,17 @@ class QA:
         store.store(chunks)
         
     def ask(self, question):
+        from prompt import Prompt
         # query similarity prompt
         store = Store(self.embedding, self.vector_store_path, self.content_store_path)
         relative_content = store.query(question, 3)
 
         # tempalate fil
         promptor = Prompt(self.llm_model)
-        prompt = promptor.build(relative_content, question)
+        prompt_msg = promptor.build(relative_content, question)
 
         # send to the llm
-        return self.llm.chat(prompt)
+        return self.llm.chat(prompt_msg)
 
 if __name__ == '__main__':
     qa = QA()

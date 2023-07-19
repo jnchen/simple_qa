@@ -14,5 +14,5 @@ if __name__ == '__main__':
 
     args = arg_parser.parse_args()
 
-    app = QA()
+    app = QA(build_mode=True)
     app.add_resource(args.type, args.url)

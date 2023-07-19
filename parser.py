@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+import os
 import fitz
 import requests
 from bs4 import BeautifulSoup
@@ -16,9 +17,26 @@ def multi_split(str):
     return re.split('|'.join(map(re.escape, splitters)), str)
 
 '''
+download file to path
+'''
+def download_file(url, path):
+    resp = requests.get(url)
+    with open(path, 'wb') as f:
+        f.write(resp.content)
+
+def get_url_type(url):
+    if 'http' in url:
+        return 'url'
+    else:
+        return 'path'
+
+'''
 解析pdf文件
 '''
 def parse_pdf(path):
+    if 'url' == get_url_type(path):
+        download_file(path, '.tmp.pdf')
+        path = '.tmp.pdf'
     sentences = []
     doc = fitz.open(path)
     for page in doc:
@@ -28,6 +46,8 @@ def parse_pdf(path):
         cur_contents = multi_split(cur_content)
         result_content = list(filter(lambda x: len(x) > 1, cur_contents))
         sentences.extend(result_content)
+    if '.tmp.pdf' == path:
+        os.remove('.tmp.pdf')
     return sentences
 
 '''
